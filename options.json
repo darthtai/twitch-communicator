@@ -1,0 +1,16 @@
+{
+  "options": {
+    "debug": true
+  },
+  "connection": {
+    "reconnect": true,
+    "secure": true
+  },
+  "identity": {
+    "username": "communicator_bot",
+    "password": ""
+  },
+  "channels": [
+    "#soulsain"
+  ]
+}

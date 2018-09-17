@@ -1,0 +1,10 @@
+{
+  "channels": {
+    "#lucid_live": {
+      "commands": {
+        "!blow": "\"I blew him so hard!\" - Lucid_LIVE"
+      },
+      "subOnlyCommands": true
+    }
+  }
+}
