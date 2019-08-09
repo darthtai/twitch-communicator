@@ -3,7 +3,6 @@ const defaultOptions = require('../options.json');
 const customCommands = require('../customCommands.json');
 const challengeOptions = require('./crons/minigames/challenges');
 const enumHelper = require('./enumHelper');
-const Promise = require('bluebird');
 const fs = require('fs');
 const crons = require('./crons/index');
 const db = require('./database');
@@ -17,10 +16,8 @@ fs.readFile('../channels.json', (err, data) => {
   global.channels['#soulsain'].users.duel = [];
 });
 
-function initialize(customOptions) {
-  const twitch = new TMI.client(defaultOptions);
-
-
+function initialize(options = defaultOptions) {
+  const twitch = new TMI.client(options);
 
   return twitch;
 }
@@ -127,7 +124,7 @@ function replyChat(channel, user, message, twitch) {
     return twitch.say(channel, customCommandChannel.commands[message]);
   }
 
-  return Promise.resolve();
+  return;
 }
 
 function replyWhisper(user, message, channel, twitch) {
@@ -192,10 +189,10 @@ function replyWhisper(user, message, channel, twitch) {
     return twitch.whisper(username, `${pointsToAdd} added to ${userToAdd} in channel ${userChannel}.`);
   }
 
-  return Promise.resolve();
+  return;
 }
 
-function main() {
+async function main() {
   const twitch = initialize();
   console.log('Initialized.');
 
@@ -208,15 +205,18 @@ function main() {
         return;
       }
 
-      switch (userstate['message-type']) {
-        case 'chat':
-          replyChat(channel, userstate, message, twitch)
-            .catch(err => console.log(err));
-          break;
-        case 'whisper':
-          replyWhisper(userstate, message, channel, twitch)
-            .catch(err => console.log(err));
-          break;
+      const stateActionsMap = {
+        chat: replyChat,
+        whisper: replyWhisper
+      };
+
+      const messageType = userstate['message-type'];
+
+      const stateAction = stateActionsMap[messageType];
+      
+      if (stateAction) {
+        stateAction(channel, userstate, message, twitch)
+          .catch(err => console.log(err));
       }
     });
 
@@ -245,7 +245,7 @@ function main() {
       const onlineUser = global.channels[channel].users.online[username];
 
       if (existingUser) {
-        global.channels[channel].users.list[username].visits += 1;
+        existingUser.visits += 1;
       } else {
         const loggingUser = {
           name: username,
@@ -257,7 +257,7 @@ function main() {
       }
 
       if (!onlineUser) {
-        global.channels[channel].users.online[global.channels[channel].users.list[username]];
+        global.channels[channel].users.online[existingUser];
       }
 
     });
